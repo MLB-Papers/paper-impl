@@ -5,10 +5,10 @@ Implementation of basic papers
 
 Filename should be formatted like below
 ```
-{id}-{paper_name}/{name}.ipynb
+{id}-{[paper_alias]_[paper_year]}/{user_name}.ipynb
 ```
 
 ### Example
 ```
-1-AlexNet/changwoolab.ipynb
+1-AlexNet_2012/changwoolab.ipynb
 ```
