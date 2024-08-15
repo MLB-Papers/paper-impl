@@ -65,9 +65,19 @@ class MBConvBlock(nn.Module):
         else:
             return self.block(x)
 
+## Constants determined by small grid search
+alpha = 1.2
+beta = 1.1
+gamma = 1.15
+
 class EfficientNet(nn.Module):
-    def __init__(self, width_mult=1.0, depth_mult=1.0, resolution_mult=1.0, num_classes=1000, dropout_rate=0.2):
+    def __init__(self, phi=0, num_classes=1000, dropout_rate=0.2):
         super(EfficientNet, self).__init__()
+
+        # Calculate scaled width, depth, and resolution
+        width_mult = alpha ** phi
+        depth_mult = beta ** phi
+        resolution_mult = gamma ** phi
 
         def round_filters(filters, width_mult):
             return int(filters * width_mult)
@@ -123,43 +133,21 @@ class EfficientNet(nn.Module):
         x = self.classifier(x)
         return x
 
-def efficientnet_b0(num_classes=1000):
-    return EfficientNet(width_mult=1.0, depth_mult=1.0, resolution_mult=1.0, num_classes=num_classes)
-
-def efficientnet_b1(num_classes=1000):
-    return EfficientNet(width_mult=1.0, depth_mult=1.1, resolution_mult=1.15, num_classes=num_classes)
-
-def efficientnet_b2(num_classes=1000):
-    return EfficientNet(width_mult=1.1, depth_mult=1.2, resolution_mult=1.2, num_classes=num_classes)
-
-def efficientnet_b3(num_classes=1000):
-    return EfficientNet(width_mult=1.2, depth_mult=1.4, resolution_mult=1.3, num_classes=num_classes)
-
-def efficientnet_b4(num_classes=1000):
-    return EfficientNet(width_mult=1.4, depth_mult=1.8, resolution_mult=1.4, num_classes=num_classes)
-
-def efficientnet_b5(num_classes=1000):
-    return EfficientNet(width_mult=1.6, depth_mult=2.2, resolution_mult=1.6, num_classes=num_classes)
-
-def efficientnet_b6(num_classes=1000):
-    return EfficientNet(width_mult=1.8, depth_mult=2.6, resolution_mult=1.8, num_classes=num_classes)
-
-def efficientnet_b7(num_classes=1000):
-    return EfficientNet(width_mult=2.0, depth_mult=3.1, resolution_mult=2.0, num_classes=num_classes)
-
-# Time to start train!
+# EfficientNet variants using the phi value to scale width, depth, and resolution
+def efficientnet(phi, num_classes=1000):
+    return EfficientNet(phi=phi, num_classes=num_classes)
 
 def train_and_evaluate_efficientnet(variant='b0', num_epochs=10, batch_size=64, learning_rate=0.001):
     # Mapping of variant to model function
     variant_map = {
-        'b0': efficientnet_b0,
-        'b1': efficientnet_b1,
-        'b2': efficientnet_b2,
-        'b3': efficientnet_b3,
-        'b4': efficientnet_b4,
-        'b5': efficientnet_b5,
-        'b6': efficientnet_b6,
-        'b7': efficientnet_b7
+        'b0': efficientnet(phi=0, num_classes=10),
+        'b1': efficientnet(phi=1, num_classes=10),
+        'b2': efficientnet(phi=2, num_classes=10),
+        'b3': efficientnet(phi=3, num_classes=10),
+        'b4': efficientnet(phi=4, num_classes=10),
+        'b5': efficientnet(phi=5, num_classes=10),
+        'b6': efficientnet(phi=6, num_classes=10),
+        'b7': efficientnet(phi=7, num_classes=10)
     }
 
     if variant not in variant_map:
@@ -187,7 +175,7 @@ def train_and_evaluate_efficientnet(variant='b0', num_epochs=10, batch_size=64, 
     testloader = DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
 
     # Initialize the model, loss function, and optimizer
-    model = variant_map[variant](num_classes=10)  # CIFAR-10 has 10 classes
+    model = variant_map[variant]
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -231,9 +219,9 @@ def train_and_evaluate_efficientnet(variant='b0', num_epochs=10, batch_size=64, 
 
     return model, accuracy
 
-# Perform training
-for variant in ['b0', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7']:
-    print(f"Testing EfficientNet-{variant.upper()}")
-    model, accuracy = train_and_evaluate_efficientnet(variant=variant)
-    print(f"Model EfficientNet-{variant.upper()} achieved an accuracy of {accuracy:.2f}% on CIFAR-10\n")
+# Example usage:
+for phi in range(8):
+    print(f"Testing EfficientNet with phi={phi}")
+    model, accuracy = train_and_evaluate_efficientnet(variant=f'b{phi}')
+    print(f"Model EfficientNet with phi={phi} achieved an accuracy of {accuracy:.2f}% on CIFAR-10\n")
 
