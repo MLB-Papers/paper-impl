@@ -85,6 +85,8 @@ class EfficientNet(nn.Module):
         def round_repeats(repeats, depth_mult):
             return int(ceil(repeats * depth_mult))
 
+
+        # dummy
         settings = [
             # expand_ratio, channels, repeats, stride, kernel_size
             [1, 16, 1, 1, 3],
