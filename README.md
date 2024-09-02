@@ -1,6 +1,10 @@
 # paper-impl
 Implementation of basic papers
 
+## Paper Study Notion Link
+
+https://candle-pigment-f56.notion.site/PAPER-STUDY-bd0468548f14419587e7a60b63723766?pvs=4
+
 ## How to upload
 
 Filename should be formatted like below
